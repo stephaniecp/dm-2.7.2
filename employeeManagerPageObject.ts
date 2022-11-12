@@ -29,4 +29,10 @@ export class EmployeePageObject {
     async quitPage () {
         await this.crazyDriver.quit()
     }
+    async getLastEmployeeName () {
+        const byLastEmployeeAdded: By = By.xpath('//ul[@class="listContainer"]/li[last()-1]')
+        const lastEmployeeLi = await this.crazyDriver.findElement(byLastEmployeeAdded)
+        const employeeNameDisplayLi = await lastEmployeeLi.getText()
+        return employeeNameDisplayLi
+    }
 }

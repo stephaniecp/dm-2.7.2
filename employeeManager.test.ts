@@ -4,36 +4,51 @@ import { EmployeePageObject } from "./employeeManagerPageObject";
 const chromedriver = require("chromedriver");
 import { WebDriver, Builder, Capabilities, By, until } from "selenium-webdriver";
 
-const bunnyDriver: WebDriver = new Builder()
+const otherDriver: WebDriver = new Builder()
   .withCapabilities(Capabilities.chrome())
   .build();
 
 //Created the webDriver (type) that is being reffered to in the ...PageObject.ts as stephDriver/crazyDriver/bunnyDriver (all the same)  
-const employeePageObject = new EmployeePageObject(bunnyDriver)
+const employeePageObject = new EmployeePageObject(otherDriver)
 
 const byAddEmployeeCta: By = By. name("addEmployee")
+//duplicated in PO
 const byLastEmployeeAdded: By = By.xpath('//ul[@class="listContainer"]/li[last()-1]')
-
 const byEmployeecount: By = By.xpath('//ul[@class="listContainer"]/li')
+const byNameInputField: By = By.name("nameEntry")
+const byPhoneInput: By = By.name("phoneEntry")
+const byTitleInput: By = By.name("titleEntry")
+const bySaveButton: By = By.id("saveBtn")
+const editedNameValue = "Bobby McGee"
 
 describe("Employee Manager 1.2", () => {
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         await employeePageObject.navigate()
     });
     afterAll(async () => {
-        // await employeePageObject.quitPage()
+        await employeePageObject.quitPage()
     });
 
     test ("Create a new employee", async () => {
-        await bunnyDriver.wait(until.elementLocated(byAddEmployeeCta))
-        await bunnyDriver.findElement(byAddEmployeeCta).click()
-        const lastEmployeeLi = await bunnyDriver.findElement(byLastEmployeeAdded)
-        // await becasue .getText returns a Promise (and needs an await)
-        const employeeNameDisplayLi = await lastEmployeeLi.getText()
+        await otherDriver.wait(until.elementLocated(byAddEmployeeCta))
+        await otherDriver.findElement(byAddEmployeeCta).click()
+        const employeeNameDisplayLi = await employeePageObject.getLastEmployeeName()
         expect(employeeNameDisplayLi).toBe("New Employee")
         console.log(`The last li is ${employeeNameDisplayLi}`)
         expect(employeeNameDisplayLi).not.toBe("Lois Brewer")
+    })
+
+    test ("Edit the new employee", async () => {
+        await otherDriver.findElement(byLastEmployeeAdded).click()
+        await otherDriver.wait(
+            until.elementIsVisible(await otherDriver.findElement(byNameInputField))
+        )
+        const nameImputField =  await otherDriver.findElement(byNameInputField)
+        nameImputField.clear()
+        nameImputField.sendKeys(editedNameValue)
+        await otherDriver.findElement(bySaveButton).click()
+        expect(await employeePageObject.getLastEmployeeName()).toBe(editedNameValue)
     })
 
     // // Reality check - PASSED
